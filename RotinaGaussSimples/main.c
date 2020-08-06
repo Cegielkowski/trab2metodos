@@ -4,9 +4,9 @@
 void mostraMatriz(int n, float mat[n][n]){
     int i,j;
     for(i=0;i<n;i++){
-        printf("|");
+        printf("| ");
         for(j=0;j<n;j++){
-            printf(" %.2f", mat[i][j]);
+            printf("%5.2f", mat[i][j]);
         }
         printf(" |\n");
     }
@@ -15,7 +15,7 @@ void mostraMatriz(int n, float mat[n][n]){
 void gaussSimples(int n, float A[n][n], float b[n]){
 
     int i, j, k;
-    float m[n][n];
+    float somat, m[n][n], X[n];
 	for (k = 0; k < n - 1; k++) {
 		for (i = k + 1; i < n; i++) {
 			m[i][k]= - (A[i][k]/A[k][k]);
@@ -29,9 +29,18 @@ void gaussSimples(int n, float A[n][n], float b[n]){
     printf("\n\n----Matriz Escalonada----\n");
     mostraMatriz(n, A);
 
+	// SUBST REGRESSIVA
     printf("\n--x--\n");
+    X[n-1] = b[n-1]/A[n-1][n-1];
+    for(i=n-2;i>=0;i--){
+        somat = 0;
+        for(j=i+1;j<n;j++){
+            somat += A[i][j]*X[j];
+        }
+        X[i] = (b[i] - somat )/A[i][i];
+    }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", b[i]);
+        printf("|%5.2f|\n", X[i]);
     }
 
 }
@@ -64,7 +73,7 @@ int main (void) {
     }
     printf("\n\n--b--\n");
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", b[i]);
+        printf("| %5.2f |\n", b[i]);
     }
 
 	gaussSimples(n, A, b);

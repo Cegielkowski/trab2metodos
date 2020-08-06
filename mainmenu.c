@@ -15,7 +15,7 @@ void mostraMatriz(int n, float mat[n][n]){
     for(i=0;i<n;i++){
         printf("|");
         for(j=0;j<n;j++){
-            printf(" %.2f",mat[i][j]);
+            printf(" %5.2f",mat[i][j]);
         }
         printf(" |\n");
     }
@@ -26,7 +26,7 @@ void mostraMatrizT(int n, float mat[n][n]){
     for(i=0;i<n;i++){
         printf("|");
         for(j=0;j<n;j++){
-            printf(" %.2f", mat[j][i]);
+            printf(" %5.2f", mat[j][i]);
         }
         printf(" |\n");
     }
@@ -64,7 +64,7 @@ void decomposicaoLU(int n, float mat[n][n], float b[n]){
 
 
     // SUBST PROGRESSIVA
-    printf("\n--y--\n");
+    printf("\n----y----\n");
     Y[0]=b[0]/M[0][0];
     for(i=1;i<n;i++){
         somat = 0;
@@ -74,13 +74,13 @@ void decomposicaoLU(int n, float mat[n][n], float b[n]){
         Y[i] = (b[i] - somat )/M[i][i];
     }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", Y[i]);
+        printf("| %5.2f |\n", Y[i]);
     }
 
 
 
     // SUBST REGRESSIVA
-    printf("\n--x--\n");
+    printf("\n----x----\n");
     X[n-1] = Y[n-1]/aux[n-1][n-1];
     for(i=n-2;i>=0;i--){
         somat = 0;
@@ -90,7 +90,7 @@ void decomposicaoLU(int n, float mat[n][n], float b[n]){
         X[i] = (Y[i] - somat )/aux[i][i];
     }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", X[i]);
+        printf("| %5.2f |\n", X[i]);
     }
 
 }
@@ -123,7 +123,7 @@ float cholesky(int n, float A[n][n], float b[n]){
     mostraMatrizT(n, G);
 
     //Resolvendo G.y = b
-    printf("\n--y--\n");
+    printf("\n----y----\n");
     for(i = 0; i < n; ++i) {
         somat = 0;
 
@@ -133,11 +133,11 @@ float cholesky(int n, float A[n][n], float b[n]){
         Y[i] = (b[i] - somat) / G[i][i];
     }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", Y[i]);
+        printf("| %5.2f |\n", Y[i]);
     }
 
     //Resolvendo Gt.x = y
-    printf("\n--x--\n");
+    printf("\n----x----\n");
     for (i=n-1;i>=0;i--) {
         somat=0;
         for(j=i+1;j<n;j++){
@@ -146,7 +146,7 @@ float cholesky(int n, float A[n][n], float b[n]){
         X[i] = (Y[i] - somat) / G[i][i];
     }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", X[i]);
+        printf("| %5.2f |\n", X[i]);
     }
 
 }
@@ -154,7 +154,7 @@ float cholesky(int n, float A[n][n], float b[n]){
 void gaussSimples(int n, float A[n][n], float b[n]){
 
     int i, j, k;
-    float m[n][n];
+    float somat, m[n][n], X[n];
 	for (k = 0; k < n - 1; k++) {
 		for (i = k + 1; i < n; i++) {
 			m[i][k]= - (A[i][k]/A[k][k]);
@@ -168,9 +168,80 @@ void gaussSimples(int n, float A[n][n], float b[n]){
     printf("\n\n----Matriz Escalonada----\n");
     mostraMatriz(n, A);
 
-    printf("\n--x--\n");
+	// SUBST REGRESSIVA
+    printf("\n---x---\n");
+    X[n-1] = b[n-1]/A[n-1][n-1];
+    for(i=n-2;i>=0;i--){
+        somat = 0;
+        for(j=i+1;j<n;j++){
+            somat += A[i][j]*X[j];
+        }
+        X[i] = (b[i] - somat )/A[i][i];
+    }
     for(i=0;i<n;i++){
-        printf("|%.2f|\n", b[i]);
+        printf("| %5.2f |\n", X[i]);
+    }
+
+}
+
+void gaussPivoteamentoParcial(int n, float A[n][n], float b[n]){
+
+    int i, j, k, l;
+    float max, aux, auxb, pivo, somat, X[n], m[n][n];
+
+    for (k = 0; k < n-1; k++){
+        max = abs(A[k][k]);
+        l = k;
+        // Procura maior pivo
+        for (i = k+1; i < n; i++){
+          if (abs(A[i][k]) > max){
+            max = abs(A[i][k]);
+            l = i;
+          }
+        }
+        // Verifica se o maior é o pivo
+        if (l != k){
+          // Troca linha atual pela linha do maior pivo
+          for (j = k; j <= n; j++){
+            aux = A[k][j];
+            auxb = b[k];
+            A[k][j] = A[l][j];
+            A[l][j] = aux;
+            b[k] = b[l];
+            b[l] = auxb;
+          }
+        }
+        // Metodo de Gauss Após pivotagem
+        for (i = k+1; i < n; i++){
+          m[i][k]= - (A[i][k]/A[k][k]);
+          A[i][k] = 0;
+          for (j = k+1; j <= n; j++){
+            A[i][j] = A[i][j] + m[i][k] * A[k][j];
+          }
+          b[i] = b[i] + (m[i][k] * b[k]);
+        }
+    }
+
+    printf("\n\n----Matriz Escalonada----\n");
+    mostraMatriz(n, A);
+
+    printf("\n----b----\n");
+    for(i=0;i<n;i++){
+        printf("| %5.2f |\n", b[i]);
+    }
+
+    // SUBST REGRESSIVA
+    printf("\n----x----\n");
+    X[n-1] = b[n-1]/A[n-1][n-1];
+    for(i=n-2;i>=0;i--){
+        somat = 0;
+        for(j=i+1;j<n;j++){
+            somat += A[i][j]*X[j];
+        }
+        X[i] = (b[i] - somat )/A[i][i];
+    }
+    for(i=0;i<n;i++){
+        printf("| %5.2f |\n", X[i]);
     }
 
 }
@@ -181,6 +252,9 @@ int main(void){
 
 	printf("Programa desenvolvido para o Trabalho 2 da\ndisciplina de Metodos Numericos Computacionais\nda UNESP Bauru - 1 Sem 2020\n\n\n");
 
+	// Definindo um tamanho fixo para a matriz no inicio do programa
+	// Apenas para dispensar uso de alocacao dinamica e/ou um 'nMAX' pre-definido
+	// Consumindo recursos sem necessidade
     printf("Digite a ordem N da matriz => ");
     scanf("%d", &n);
 
@@ -195,6 +269,7 @@ int main(void){
         printf("\n===  4-Decomposicao LU       ===");
         printf("\n===  5-Cholesky              ===");
         printf("\n===  6-Gauss Simples         ===");
+        printf("\n===  7-Gauss Pivo Parcial    ===");
         printf("\n===  0-Para Sair             ===");
         printf("\n================================");
         printf("\n================================");
@@ -236,9 +311,9 @@ int main(void){
             //Print matriz e termo independente
             printf("\n----Matriz A----\n");
             mostraMatriz(n, A);
-            printf("\n\n--b--\n");
+            printf("\n\n----b----\n");
             for(i=0;i<n;i++){
-                printf("|%.2f|\n", b[i]);
+                printf("| %5.2f |\n", b[i]);
             }
 
             decomposicaoLU(n, A, b);
@@ -264,9 +339,9 @@ int main(void){
             //Print matriz e termo independente
             printf("\n----Matriz A----\n");
             mostraMatriz(n, A);
-            printf("\n\n--b--\n");
+            printf("\n\n----b----\n");
             for(i=0;i<n;i++){
-                printf("|%.2f|\n", b[i]);
+                printf("| %5.2f |\n", b[i]);
             }
 
             cholesky(n, A, b);
@@ -292,12 +367,40 @@ int main(void){
             //Print matriz e termo independente
             printf("\n----Matriz A----\n");
             mostraMatriz(n, A);
-            printf("\n\n--b--\n");
+            printf("\n\n----b----\n");
             for(i=0;i<n;i++){
-                printf("|%.2f|\n", b[i]);
+                printf("| %5.2f |\n", b[i]);
             }
 
             gaussSimples(n, A, b);
+
+            break;
+        case 7:
+            printf("\nMETODO GAUSS PIVOTEAMENTO PARCIAL ESCOLHIDO\n\n");
+
+            //Lendo Matriz A
+            for(i=0;i<n;i++){
+                for(j=0;j<n;j++){
+                    printf("Digite o valor da posicao A[%d][%d]=",i+1,j+1);
+                    scanf("%f",&A[i][j]);
+                }
+            }
+
+            printf("\nEntre com os termos independentes (b):\n");
+            for(i=0; i<n;i++){
+                printf("b[%d]:", i+1);
+                scanf("%f", &b[i]);
+            }
+
+            //Print matriz e termo independente
+            printf("\n----Matriz A----\n");
+            mostraMatriz(n, A);
+            printf("\n\n----b----\n");
+            for(i=0;i<n;i++){
+                printf("| %5.2f |\n", b[i]);
+            }
+
+            gaussPivoteamentoParcial(n, A, b);
 
             break;
 
