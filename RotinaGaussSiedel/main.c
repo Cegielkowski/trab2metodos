@@ -11,15 +11,21 @@
 
 int main() {
   float a[10][10], b[10], x[10], xn[10], epp = 0.00001, sum;
-  int i, j, n, flag;
+  int i, j, n, flag, maxIt;
 
-  printf("Enter number of variables: ");
-  scanf("%d", & n);
-  printf("Enter the coefficients row-wise: ");
+  printf("precisão desejada(e): ");
+  scanf("%f", &epp);
+
+  printf("número máximo de iterações: ");
+  scanf("%d", &maxIt);
+
+  printf("ordem do sistema: ");
+  scanf("%d", &n);
+  printf("matriz dos coeficientes: ");
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
       scanf("%f", & a[i][j]);
-  printf("Enter right hand vectors: ");
+  printf("vetor dos termos independentes: ");
   for (i = 0; i < n; i++)
     scanf("%f", & b[i]);
   for (i = 0; i < n; i++)
@@ -31,21 +37,34 @@ int main() {
     for (i = 0; i < n; i++) {
       sum = b[i];
       for (j = 0; j < n; j++) {
-        if (j < i)
+        if (j < i) {
           sum -= a[i][j] * xn[j];
-        else if (j > i)
+        }
+        else if (j > i) {
           sum -= a[i][j] * x[j];
+        }
         xn[i] = sum / a[i][j];
       }
     }
     flag = 0; // indicates |x[i]-xn[i]|<epp for all i
-    for (i = 0; i < n; i++)
-      if (fabs(x[i] - xn[i]) > epp)
+    for (i = 0; i < n; i++) {
+      if (fabs(x[i] - xn[i]) > epp) {
         flag = 1;
-    if (flag == 1)
-      for (i = 0; i < n; i++)
+      }
+    }
+    if (flag == 1){ 
+      for (i = 0; i < n; i++) {
         x[i] = xn[i]; // reset x[i]	
-  } while (flag == 1);
+      }
+    }
+    if (i == maxIt) {
+      printf("%d ", maxIt);
+      printf("%d ", i);
+
+      printf("num interacoes maximo atingido");
+    }
+  } while (flag == 1 || i != maxIt);
+
   printf("Solution is \n");
   for (i = 0; i < n; i++)
     printf("%8.5f ", xn[i]);
