@@ -77,7 +77,6 @@ return (a[0][0]*a[1][1]-a[0][1]*a[1][0]);
 return sum;
 }
 
-
 float triangularSuperior(int n, float A[NMAX][NMAX], float b[NMAX], float X[NMAX]){
     int i, j;
     float somat;
@@ -372,52 +371,41 @@ void JacobiRichardson(int n, float A[NMAX][NMAX], float b[NMAX], float aproximac
 }
 
 void gaussSeidel(int n, float a[NMAX][NMAX], float b[NMAX], float x[NMAX], float epp, int maxIt) {
-    float xn[NMAX], sum;
-    int i, j, flag, itAtual=0;
+    float xn[NMAX], sum, t, e;
+    int i, j, itAtual;
 
-    for (i = 0; i < n; i++) {
-        xn[i] = x[i];
-      }
+        printf("-----------------Tabela--Iteracoes----------------\n");
+        for(itAtual=1;itAtual<=maxIt;itAtual++){
+            for(i=0;i<n;i++){
+                sum=0;
+                for(j=0;j<n;j++)
+                if(j!=i){
+                  sum+=a[i][j]*xn[j];
+                }
+                t=(b[i]-sum)/a[i][i];
+                e=fabs(xn[i]-t);
+                xn[i]=t;
+            }
+            if(e<epp){
+                printf("\nConverge em %d iteracoes\n", itAtual);
+                printf("\nErro: %f < %f\n", e, epp);
+                for(i=0;i<n;i++)
+                printf("a[%3d]=%7.4f\n", i+1,xn[i]);
+                return;
+            }
 
-    do {
-  	itAtual = itAtual + 1;
-    for (i = 0; i < n; i++) {
-      sum = b[i];
-      for (j = 0; j < n; j++) {
-        if (j < i) {
-          sum -= a[i][j] * xn[j];
+            printf(" %5d\t",itAtual);
+            for(i=0;i<n;i++)
+            printf(" %9.4f\t",xn[i]);
+            printf("\n");
+            if(itAtual>=maxIt){
+                printf("\nMaximo de %d iteracoes atingido\n", itAtual);
+                printf("\nErro alcancado: %f \n", e);
+                for(i=0;i<n;i++)
+                printf("x[%3d]=%7.4f\n", i+1,xn[i]);
+                return;
+            }
         }
-        else if (j > i) {
-          sum -= a[i][j] * x[j];
-        }
-        xn[i] = sum / a[i][j];
-      }
-    }
-    flag = 0;
-    for (i = 0; i < n; i++) {
-      if (fabs(x[i] - xn[i]) > epp) {
-        flag = 1;
-      }
-    }
-    if (flag == 1){
-      for (i = 0; i < n; i++) {
-        x[i] = xn[i];
-      }
-    }
-    if (itAtual == maxIt) {
-      printf("num interacoes maximo atingido ");
-  	  printf("%d ", itAtual);
-      printf("\nA solucao atingida ate esta iteracao eh: \n");
-	  for (i = 0; i < n; i++)
-   		printf("X[%d] = %5.2f \n", i+1, xn[i]);
-
-      return 0;
-    }
-  } while (flag == 1);
-
-    printf("A solucao e \n");
-    for (i = 0; i < n; i++)
-        printf("X[%d] = %5.2f \n", i+1, xn[i]);
 }
 
 int main(void){
