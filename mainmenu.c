@@ -1,14 +1,350 @@
 /*
-TRABALHO 2 DISCIPLINA DE M�TODOS NUM�RICOS COMPUTACIONAIS
+TRABALHO 2 DISCIPLINA DE M?TODOS NUM?RICOS COMPUTACIONAIS
 UNESP Bauru - 1 SEM 2020
 AMANDA MEIRA
 ARTHUR CIPOLARI 151022071
-LUCAS CEGIELKOWSKI
+LUCAS CEGIELKOWSKI 161025978
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
+#include <conio.h>
+
+int cin(float a[100][100]){
+	int i,j,n;
+	printf("\n Digite o tamanho da matriz N*N : ");
+	scanf("%d",&n);
+	printf("\n--------------------------\n");
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++){
+			printf(" Matriz[%d][%d] : ",i+1,j+1);
+			scanf("%f",&a[i][j]);
+		}
+	printf("\n----------------------------------------------------\n");
+return n;
+}
+
+//-----------------------------------------------------
+// Mostra a matriz: 
+void cout(float a[100][100],int n,int show){
+	int i,j;
+	if(show == 1)
+		for(i=0;i < n;i++){
+			for(j=0;j < n;j++)
+				printf(" %.2f \t",a[i][j]);
+			printf("\n");
+		}
+	else if(show == 2){
+		printf("\n\n A Matriz inversa eh : \n\n");
+		for (i=0;i<n;i++){
+			for (j=0;j<n;j++)
+				printf(" %.4f \t",a[i][j]);
+			printf("\n");
+		}
+	}
+}
+
+void minor(float b[100][100],float a[100][100],int i,int n){
+	int j,l,h=0,k=0;
+	for(l=1;l<n;l++)
+		for( j=0;j<n;j++){
+			if(j == i)
+				continue;
+			b[h][k] = a[l][j];
+			k++;
+			if(k == (n-1)){
+				h++;
+				k=0;
+			}
+		}
+}
+
+//---------------------------------------------------
+//	calculate determinte of matrix
+float det(float a[100][100],int n){
+	int i;
+	float b[100][100],sum=0;
+	if (n == 1)
+return a[0][0];
+	else if(n == 2)
+return (a[0][0]*a[1][1]-a[0][1]*a[1][0]);
+	else
+		for(i=0;i<n;i++){
+			minor(b,a,i,n);	
+			sum = (float) (sum+a[0][i]*pow(-1,i)*det(b,(n-1)));	
+		}
+return sum;
+}
+
+//---------------------------------------------------
+//	calcula a matriz transposta
+void transpose(float c[100][100],float d[100][100],float n,float det){
+	int i,j;
+	float b[100][100];
+	for (i=0;i<n;i++)
+		for (j=0;j<n;j++)
+			b[i][j] = c[j][i];
+	for (i=0;i<n;i++)
+		for (j=0;j<n;j++)
+			d[i][j] = b[i][j]/det;	// array d[][] =  matriz inversa
+}
+
+//---------------------------------------------------
+//	calcula cofator da matriz
+void cofactor(float a[100][100],float d[100][100],float n,float determinte){
+	float b[100][100],c[100][100];
+	int l,h,m,k,i,j;
+	for (h=0;h<n;h++)
+		for (l=0;l<n;l++){
+			m=0;
+			k=0;
+			for (i=0;i<n;i++)
+				for (j=0;j<n;j++)
+					if (i != h && j != l){
+						b[m][k]=a[i][j];
+						if (k<(n-2))
+							k++;
+						else{
+							k=0;
+							m++;
+						}
+					}
+			c[h][l] = pow(-1,(h+l))*det(b,(n-1));	// c = cofactor Matriz
+		}
+	transpose(c,d,n,determinte);	
+}
+
+//---------------------------------------------------
+//	calcula o inveso da matriz
+void inverse(float a[100][100],float d[100][100],int n,float det){
+	if(det == 0)
+		printf("\n Matriz inversa da matriz digitada nao e possivel\n");
+	else if(n == 1)
+		d[0][0] = 1;
+	else
+		cofactor(a,d,n,det);	
+}
+
+//---------------------------------------------------
+void matrizInversa() {
+	int i,j,n;
+	float a[100][100],d[100][100],deter;
+	printf("\n Programa para achar o inveso da matrix\n\n"); 
+	n = cin(a);	
+	int print_matrix = 1;
+	cout(a,n,print_matrix);	
+	deter = (float) det(a,n);
+		printf("----------------------------------------------------\n");
+		printf("\n\n Determinante da matriz: %.4f ",deter);
+		printf("\n\n-----------------------\n");
+	inverse(a,d,n,deter);	
+	int print_inverse = 2;
+	cout(d,n,print_inverse);
+		printf("\n\n==============================* Fim *==============================\n");
+	getchar();    
+    return 0;
+}
+ 
+void gaussSiedel() {
+  float a[10][10], b[10], x[10], xn[10], epp, sum;
+  int i, j, n, flag, maxIt, itAtual=0;
+
+  printf("precisao desejada(e): ");
+  scanf("%f", &epp);
+
+  printf("numero maximo de iteracoes: ");
+  scanf("%d", &maxIt);
+
+  printf("ordem do sistema: ");
+  scanf("%d", &n);
+  printf("matriz dos coeficientes: ");
+  for (i = 0; i < n; i++)
+    for (j = 0; j < n; j++) {
+	    scanf("%f", & a[i][j]);
+	}
+  printf("vetor dos termos independentes: ");
+  for (i = 0; i < n; i++)
+    scanf("%f", & b[i]);
+  for (i = 0; i < n; i++)
+    x[i] = 0; 
+
+  do {
+  	itAtual = itAtual + 1;
+    for (i = 0; i < n; i++) {
+      sum = b[i];
+      for (j = 0; j < n; j++) {
+        if (j < i) {
+          sum -= a[i][j] * xn[j];
+        }
+        else if (j > i) {
+          sum -= a[i][j] * x[j];
+        }
+        xn[i] = sum / a[i][j];
+      }
+    }
+    flag = 0;
+    for (i = 0; i < n; i++) {
+      if (fabs(x[i] - xn[i]) > epp) {
+        flag = 1;
+      }
+    }
+    if (flag == 1){ 
+      for (i = 0; i < n; i++) {
+        x[i] = xn[i]; 
+      }
+    }
+    if (itAtual == maxIt) {
+      printf("num interacoes maximo atingido ");
+  	  printf("%d ", itAtual);
+      printf("/n A solucao atingida ate esta iteracao eh: \n");	 
+	  for (i = 0; i < n; i++)
+   		printf("%8.5f ", xn[i]);
+
+      return 0;
+    }
+  } while (flag == 1);
+
+  printf("A solucao e \n");
+  for (i = 0; i < n; i++)
+    printf("%8.5f ", xn[i]);
+}
+
+void superiorInferior() {
+  bool lower;
+  int rows, cols, r, c, matrix[10][10];
+
+  printf(" Se voce quiser a matriz triangular superior digite 0, se quiser a inferior digite qualquer numero diferente de 0: ");
+  scanf("%d", & lower);
+  printf("Digite o numero de linhas da matriz: ");
+  scanf("%d", & rows);
+  printf("\n");
+  printf("Digite o numero de colunas da matriz: ");
+  scanf("%d", & cols);
+  printf("\n");
+  printf("Digite os elementos da matriz: \n");
+  for (r = 0; r < rows; r++) {
+    for (c = 0; c < cols; c++) {
+      printf("m[%d][%d] ", r + 1, c + 1);
+      scanf("%d", & matrix[r][c]);
+    }
+  }
+  if (lower) {
+    printf("\n A matriz inferior e: ");
+    for (r = 0; r < rows; r++) {
+      printf("\n");
+      for (c = 0; c < cols; c++) {
+        if (r >= c) {
+          printf("%d\t ", matrix[r][c]);
+        } else {
+          printf("0");
+          printf("\t");
+        }
+      }
+    }
+  } else {
+    printf("\n\n A matriz superior e: ");
+    for (r = 0; r < rows; r++) {
+      printf("\n");
+      for (c = 0; c < cols; c++) {
+        if (r > c) {
+          printf("0");
+          printf("\t");
+        } else {
+          printf("%d\t ", matrix[r][c]);
+
+        }
+      }
+    }
+  }
+
+  getch();
+}
+
+void determinante()	{
+	int m = 0;
+    double **a = 0;    
+    int i = 0, j = 0, k = 0;	
+    double factor = 0;	
+    double temp = 0;	
+    int count = 0;	
+
+    printf("dimensao => ");
+    scanf("%d", &m);
+
+    a = (double **) calloc(m, sizeof(double *));
+    for(i = 0; i < m; i++)
+    {
+        a[i] = (double *) calloc(m, sizeof(double));
+    }
+
+    printf("\n\nEntre com o conteudo da matriz\n\n");
+    for(i = 0; i < m; i++)
+    {
+        for(j = 0; j < m; j++)
+        {
+            printf("A[%d ; %d] => ", i+1, j+1);
+            scanf("%lf", &a[i][j]);
+        }
+    }
+
+    // mostra a matriz
+    printf("\nMatriz digitada:\n");
+    for(i = 0; i < m; i++)
+    {
+        for(j = 0; j < m; j++)
+        {
+            printf("%8.3f ", a[i][j]);
+        }
+        printf("\n");
+    }
+
+    // faz a transformação em um triangulo...
+    for(i = 0; i < m - 1; i++)
+    {
+        if(a[i][i] == 0)
+        {
+            for(k = i; k < m; k++)
+            {
+                if(a[k][i] != 0)
+                {
+                    for(j = 0; j < m; j++)
+                    {
+                        temp = a[i][j];
+                        a[i][j] = a[k][j];
+                        a[k][j] = temp;
+                    }
+                    k = m;
+                }
+            }
+            count++;
+        }
+
+        if(a[i][i] != 0)
+        {
+            for(k = i + 1; k < m; k++)
+            {
+                factor = -1.0 * a[k][i] /  a[i][i];
+                for(j = i; j < m; j++)
+                {
+                    a[k][j] = a[k][j] + (factor * a[i][j]);
+                }
+            }
+        }
+    }
+
+    temp = 1.0;
+    // Calcula o determinante
+    for(i = 0; i < m; i++)
+        temp *= a[i][i];
+
+    printf("\nDeterminante:\n");
+    if(count % 2 == 0)
+        printf("%8.3f \n", temp);
+    else
+        printf("%8.3f \n", -1.0 * temp);
+}
 
 void mostraMatriz(int n, float mat[n][n]){
     int i,j;
@@ -262,14 +598,15 @@ int main(void){
 
     while (metodo!=0){
         printf("\n\n=============MENU===============");
-        printf("\n================================");
-        printf("\n===  1-                      ===");
-        printf("\n===  2-                      ===");
-        printf("\n===  3-                      ===");
+        printf("\n========Decompos========================");
+        printf("\n===  1-Determinante         ===");
+        printf("\n===  2-Sistematriangulares(inf/sup) ===");
+        printf("\n===  3-Gauss Siedel       ===");
         printf("\n===  4-Decomposicao LU       ===");
         printf("\n===  5-Cholesky              ===");
         printf("\n===  6-Gauss Simples         ===");
         printf("\n===  7-Gauss Pivo Parcial    ===");
+        printf("\n===  8-Matriz inversa        ===");
         printf("\n===  0-Para Sair             ===");
         printf("\n================================");
         printf("\n================================");
@@ -281,15 +618,15 @@ int main(void){
         }
         switch (metodo){
         case 1:
-            printf("Nao implementado");
+			determinante();
             break;
 
         case 2:
-            printf("Nao implementado");
+			superiorInferior();
             break;
 
         case 3:
-            printf("Nao implementado");
+			gaussSiedel();
             break;
 
         case 4:
@@ -375,40 +712,15 @@ int main(void){
             gaussSimples(n, A, b);
 
             break;
-        case 7:
-            printf("\nMETODO GAUSS PIVOTEAMENTO PARCIAL ESCOLHIDO\n\n");
-
-            //Lendo Matriz A
-            for(i=0;i<n;i++){
-                for(j=0;j<n;j++){
-                    printf("Digite o valor da posicao A[%d][%d]=",i+1,j+1);
-                    scanf("%f",&A[i][j]);
-                }
-            }
-
-            printf("\nEntre com os termos independentes (b):\n");
-            for(i=0; i<n;i++){
-                printf("b[%d]:", i+1);
-                scanf("%f", &b[i]);
-            }
-
-            //Print matriz e termo independente
-            printf("\n----Matriz A----\n");
-            mostraMatriz(n, A);
-            printf("\n\n----b----\n");
-            for(i=0;i<n;i++){
-                printf("| %5.2f |\n", b[i]);
-            }
-
-            gaussPivoteamentoParcial(n, A, b);
-
+        
+        case 8:
+            matrizInversa();
             break;
 
         default:
             printf("\nOpcao Invalida!\nEscolha novamente...\n\n");
         }
     }
+    
     return 0;
 }
-
-
