@@ -414,12 +414,6 @@ int main(void){
 
 	printf("Programa desenvolvido para o Trabalho 2 da\ndisciplina de Metodos Numericos Computacionais\nda UNESP Bauru - 1 Sem 2020\n\n\n");
 
-	// Definindo um tamanho fixo para a matriz no inicio do programa
-	// Apenas para dispensar uso de alocacao dinamica e/ou um 'nMAX' pre-definido
-	// Consumindo recursos sem necessidade
-    //printf("Digite a ordem N da matriz => ");
-    //scanf("%d", &n);
-
     float A[NMAX][NMAX], b[NMAX], X[NMAX],aproximacao[NMAX], erro;
 
     while (metodo!=0){
